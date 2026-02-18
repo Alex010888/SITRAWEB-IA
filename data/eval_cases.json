@@ -1,0 +1,176 @@
+{
+  "version": "1.0",
+  "description": "Conjunto de evaluación del Defensor Laboral IA. expected_refs: al menos uno debe aparecer en los resultados.",
+  "cases": [
+    {
+      "id": "despido-1",
+      "category": "despido",
+      "pregunta": "Me despidieron sin aviso, ¿qué me corresponde?",
+      "expected_refs": ["ART-55", "ART-58", "ART-59"]
+    },
+    {
+      "id": "despido-2",
+      "category": "despido",
+      "pregunta": "Me echaron sin causa justificada",
+      "expected_refs": ["ART-55", "ART-58", "ART-59", "CLA-7"]
+    },
+    {
+      "id": "despido-3",
+      "category": "despido",
+      "pregunta": "Despido injustificado indemnización",
+      "expected_refs": ["ART-55", "ART-58", "ART-59"]
+    },
+    {
+      "id": "despido-4",
+      "category": "despido",
+      "pregunta": "Me liquidaron y no me pagaron todo",
+      "expected_refs": ["ART-55", "ART-58", "ART-59", "ART-57"]
+    },
+    {
+      "id": "despido-5",
+      "category": "despido",
+      "pregunta": "¿Qué dice el contrato sobre estabilidad laboral y despido?",
+      "expected_refs": ["CLA-7", "ART-55", "ART-58"]
+    },
+    {
+      "id": "finiquito-1",
+      "category": "finiquito",
+      "pregunta": "Me deben el finiquito",
+      "expected_refs": ["ART-55", "ART-58", "ART-59", "ART-57"]
+    },
+    {
+      "id": "preaviso-1",
+      "category": "preaviso",
+      "pregunta": "¿Cuánto es el preaviso si me despiden?",
+      "expected_refs": ["ART-55", "ART-57", "ART-58"]
+    },
+    {
+      "id": "vacaciones-1",
+      "category": "vacaciones",
+      "pregunta": "¿Cuántos días de vacaciones me corresponden?",
+      "expected_refs": ["CLA-55", "ART-177", "ART-178"]
+    },
+    {
+      "id": "vacaciones-2",
+      "category": "vacaciones",
+      "pregunta": "No me dan vacaciones",
+      "expected_refs": ["CLA-55", "ART-177", "ART-178"]
+    },
+    {
+      "id": "vacaciones-3",
+      "category": "vacaciones",
+      "pregunta": "Días de descanso anual",
+      "expected_refs": ["CLA-55", "ART-177", "ART-178"]
+    },
+    {
+      "id": "bono-1",
+      "category": "bono",
+      "pregunta": "¿Qué dice el contrato sobre la bonificación?",
+      "expected_refs": ["CLA-55", "CLA-56", "CLA-52"]
+    },
+    {
+      "id": "bono-2",
+      "category": "bono",
+      "pregunta": "Tarjeta de regalo navidad",
+      "expected_refs": ["CLA-55", "CLA-56", "CLA-52"]
+    },
+    {
+      "id": "bono-3",
+      "category": "bono",
+      "pregunta": "Bono de diciembre",
+      "expected_refs": ["CLA-55", "CLA-56", "CLA-52"]
+    },
+    {
+      "id": "aguinaldo-1",
+      "category": "aguinaldo",
+      "pregunta": "¿Cuándo me pagan el aguinaldo?",
+      "expected_refs": ["ART-196", "ART-197", "CLA-55", "CLA-56"]
+    },
+    {
+      "id": "aguinaldo-2",
+      "category": "aguinaldo",
+      "pregunta": "Décimo tercero",
+      "expected_refs": ["ART-196", "ART-197", "CLA-55", "CLA-56"]
+    },
+    {
+      "id": "salario-1",
+      "category": "salario",
+      "pregunta": "No me pagan mi salario",
+      "expected_refs": ["ART-118", "ART-119", "ART-120"]
+    },
+    {
+      "id": "salario-2",
+      "category": "salario",
+      "pregunta": "Me deben la quincena",
+      "expected_refs": ["ART-118", "ART-119", "ART-120"]
+    },
+    {
+      "id": "horas_extras-1",
+      "category": "horas_extras",
+      "pregunta": "¿Cómo se pagan las horas extras?",
+      "expected_refs": ["ART-168", "ART-169", "ART-170"]
+    },
+    {
+      "id": "contrato-1",
+      "category": "contrato_colectivo",
+      "pregunta": "¿Qué dice el contrato colectivo sobre vacaciones?",
+      "expected_refs": ["CLA-55"]
+    },
+    {
+      "id": "contrato-2",
+      "category": "contrato_colectivo",
+      "pregunta": "¿Qué cláusulas hay sobre despido?",
+      "expected_refs": ["CLA-7", "ART-55", "ART-58"]
+    },
+    {
+      "id": "cese-1",
+      "category": "despido",
+      "pregunta": "Me cesaron sin motivo",
+      "expected_refs": ["ART-55", "ART-58", "ART-59", "CLA-7"]
+    },
+    {
+      "id": "cese-2",
+      "category": "despido",
+      "pregunta": "Cesantía e indemnización",
+      "expected_refs": ["ART-55", "ART-58", "ART-59"]
+    },
+    {
+      "id": "jerga-1",
+      "category": "despido",
+      "pregunta": "Me botaron sin aviso",
+      "expected_refs": ["ART-55", "ART-58", "ART-59"]
+    },
+    {
+      "id": "jerga-2",
+      "category": "despido",
+      "pregunta": "Me sacaron del trabajo",
+      "expected_refs": ["ART-55", "ART-58", "ART-59", "CLA-7"]
+    },
+    {
+      "id": "semantico-1",
+      "category": "despido",
+      "pregunta": "Me corrieron sin causa",
+      "expected_refs": ["ART-55", "ART-58", "ART-59"]
+    },
+    {
+      "id": "semantico-2",
+      "category": "despido",
+      "pregunta": "Terminaron mi contrato sin justificación",
+      "expected_refs": ["ART-55", "ART-58", "ART-59"]
+    },
+    {
+      "id": "negativo-1",
+      "category": "sin_info",
+      "pregunta": "¿Qué dice la ley sobre teletrabajo?",
+      "expected_refs": [],
+      "expect_no_relevant": true
+    },
+    {
+      "id": "negativo-2",
+      "category": "sin_info",
+      "pregunta": "Reglamento de trabajo remoto",
+      "expected_refs": [],
+      "expect_no_relevant": true
+    }
+  ]
+}

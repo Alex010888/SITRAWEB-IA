@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+  <rect width="900" height="700" fill="#b10f2e"/>
+  <rect x="60" y="60" width="780" height="580" rx="46" fill="rgba(0,0,0,.22)"/>
+  <circle cx="450" cy="280" r="110" fill="rgba(255,255,255,.92)"/>
+  <rect x="230" y="410" width="440" height="220" rx="110" fill="rgba(255,255,255,.92)"/>
+  <text x="450" y="650" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="rgba(255,255,255,.92)" font-weight="700">Tesorer�a</text>
+</svg>
+

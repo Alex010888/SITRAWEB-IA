@@ -1,0 +1,14 @@
+# Seguridad: impedir ejecución de PHP y otros scripts en uploads
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+# Evitar que Apache sirva archivos .php como ejecutables (por si mod_php está desactivado aquí)
+<FilesMatch "\.(php|php5|phtml|phar)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+# Solo permitir tipos conocidos (opcional: restringir por extensión)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

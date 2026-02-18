@@ -1,0 +1,14 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Si existe el archivo o directorio, servirlo
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Rutas limpias -> index.php
+RewriteRule ^ index.php [L]
+</IfModule>
+

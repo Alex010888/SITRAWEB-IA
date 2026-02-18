@@ -1,0 +1,2 @@
+cct_sitracabana/contrato_colectivo.pdf => data/interim/extracted/cct_sitracabana/contrato_colectivo.txt | scanned_like=False
+codigo_trabajo/codigo_de_trabajo.pdf => data/interim/extracted/codigo_trabajo/codigo_de_trabajo.txt | scanned_like=False

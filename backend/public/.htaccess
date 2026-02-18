@@ -1,0 +1,19 @@
+# Prevenir acceso directo
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# IMPORTANTE: Pasar el header Authorization a PHP
+# Sin esto, Apache no envía el header y JWT fallará
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Si existe el archivo o directorio, servirlo
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Enviar todo a index.php
+RewriteRule ^ index.php [L]
+</IfModule>

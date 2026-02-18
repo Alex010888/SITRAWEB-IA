@@ -1,0 +1,62 @@
+# ============================================
+# Nginx – API Backend (Module 7)
+# ============================================
+# Incluir dentro de un server {} o como fragmento.
+# Ajustar rutas y server_name según tu entorno.
+# DocumentRoot = backend/public; uploads servidos desde backend/uploads.
+
+server {
+    listen 80;
+    server_name api.tudominio.com;
+    root /var/www/sitra_web/backend/public;
+
+    index index.php;
+    charset utf-8;
+
+    # Logs
+    access_log /var/log/nginx/sitra_api_access.log;
+    error_log  /var/log/nginx/sitra_api_error.log;
+
+    # No listar directorios
+    autoindex off;
+
+    # Bloquear acceso a archivos sensibles en la raíz del proyecto
+    location ~ /\. {
+        deny all;
+    }
+    location ~ \.env {
+        deny all;
+    }
+    location ~ \.sql$ {
+        deny all;
+    }
+
+    # Servir uploads (solo lectura; sin ejecutar PHP)
+    location /uploads {
+        alias /var/www/sitra_web/backend/uploads;
+        location ~ \.(php|phtml|phar)$ {
+            deny all;
+        }
+        add_header X-Content-Type-Options "nosniff";
+    }
+
+    # API: todo a index.php
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+        fastcgi_read_timeout 60;
+    }
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+}

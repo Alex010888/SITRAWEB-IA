@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0b0f14"/>
+      <stop offset="1" stop-color="#178a3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)"/>
+  <rect x="80" y="120" width="1040" height="460" rx="26" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.18)"/>
+  <text x="110" y="220" font-family="Arial, Helvetica, sans-serif" font-size="54" fill="#ffffff" font-weight="700">Noticia</text>
+  <text x="110" y="285" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="rgba(255,255,255,.78)">Comunicado oficial del sindicato</text>
+  <g fill="rgba(255,255,255,.65)">
+    <rect x="110" y="340" width="700" height="18" rx="9"/>
+    <rect x="110" y="380" width="880" height="18" rx="9"/>
+    <rect x="110" y="420" width="780" height="18" rx="9"/>
+    <rect x="110" y="460" width="620" height="18" rx="9"/>
+  </g>
+  <circle cx="1030" cy="210" r="34" fill="#b10f2e"/>
+  <path d="M1018 212h24" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M1018 198h24" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+</svg>
+

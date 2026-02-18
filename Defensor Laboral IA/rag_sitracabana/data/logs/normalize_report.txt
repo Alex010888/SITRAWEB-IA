@@ -1,0 +1,2 @@
+cct_sitracabana/contrato_colectivo.txt => data/clean/cct_sitracabana/contrato_colectivo.txt | chars_in=98416 | chars_out=96895
+codigo_trabajo/codigo_de_trabajo.txt => data/clean/codigo_trabajo/codigo_de_trabajo.txt | chars_in=442042 | chars_out=431034

@@ -1,0 +1,79 @@
+# ============================================
+# Docker Compose – SITRACABAÑA API + MySQL (Module 7)
+# ============================================
+# Uso: desde la raíz del repo (donde está backend/)
+#   docker compose -f backend/deployment/docker-compose.yml up -d
+#
+# Variables: crear backend/deployment/.env (ver .env.docker.example).
+
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.api
+    container_name: sitra_api
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-sitra_web}
+      - DB_USER=${DB_USER:-sitra_api}
+      - DB_PASS=${DB_PASS}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_DEBUG=0
+      - UPLOADS_BASE_URL=${UPLOADS_BASE_URL:-http://localhost/uploads}
+    volumes:
+      - ../uploads:/var/www/backend/uploads
+      - ../app:/var/www/backend/app:ro
+      - ../routes:/var/www/backend/routes:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sitra_net
+
+  nginx:
+    image: nginx:alpine
+    container_name: sitra_nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ..:/var/www/backend:ro
+      - ./nginx.docker.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+    networks:
+      - sitra_net
+
+  db:
+    image: mysql:8.0
+    container_name: sitra_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-sitra_web}
+      MYSQL_USER: ${DB_USER:-sitra_api}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - sitra_mysql_data:/var/lib/mysql
+      - ../database_api.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ../database_sections.sql:/docker-entrypoint-initdb.d/02_sections.sql:ro
+      - ../database_media.sql:/docker-entrypoint-initdb.d/03_media.sql:ro
+      - ../database_activity_logs.sql:/docker-entrypoint-initdb.d/04_logs.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sitra_net
+
+networks:
+  sitra_net:
+    driver: bridge
+
+volumes:
+  sitra_mysql_data:

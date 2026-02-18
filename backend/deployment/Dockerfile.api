@@ -1,0 +1,18 @@
+# PHP-FPM 8.2 para API SITRACABAÑA (Module 7)
+FROM php:8.2-fpm-alpine
+
+RUN apk add --no-cache $PHPIZE_DEPS \
+    && docker-php-ext-install pdo pdo_mysql
+
+WORKDIR /var/www/backend
+
+# Desde backend/ (context es .. en docker-compose)
+COPY app ./app
+COPY routes ./routes
+COPY public/index.php ./public/
+
+# .env se inyecta en runtime (no copiar .env real al imagen)
+RUN chown -R www-data:www-data /var/www/backend
+
+EXPOSE 9000
+CMD ["php-fpm"]

@@ -1,0 +1,29 @@
+# ============================================
+# backend/public/.htaccess – Production (Module 7)
+# ============================================
+# Este es el DocumentRoot recomendado. Aquí solo debe estar index.php y este .htaccess.
+# Ajustar según tu ruta base (ej. /api o /backend/public).
+
+Options -Indexes
+
+# Security headers (si mod_headers está disponible)
+<IfModule mod_headers.c>
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Pasar Authorization a PHP (necesario para JWT)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    RewriteRule ^ index.php [L]
+</IfModule>

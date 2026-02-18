@@ -1,0 +1,15 @@
+{
+  "name": "defensor-laboral-ia",
+  "version": "2.0.0",
+  "description": "Asistente RAG sobre Código de Trabajo y Contrato Colectivo SITRACABAÑA",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}

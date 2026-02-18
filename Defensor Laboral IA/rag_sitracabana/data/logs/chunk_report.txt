@@ -1,0 +1,2 @@
+cct_sitracabana/contrato_colectivo.txt | source=cct_sitracabana | sections=77 | chunks=91
+codigo_trabajo/codigo_de_trabajo.txt | source=codigo_trabajo | sections=649 | chunks=690

@@ -1,0 +1,40 @@
+# ============================================
+# Backend ROOT .htaccess (Module 7 - Security)
+# ============================================
+# Usar cuando el DocumentRoot NO es backend/public (ej. backend/ expuesto).
+# Objetivo: denegar acceso a archivos sensibles y evitar listado.
+#
+# Si tu DocumentRoot es backend/public, este archivo no se ejecuta;
+# aun así conviene tener estas reglas en el directorio padre (vía Apache
+# <Directory> o en el .htaccess del proyecto raíz).
+
+# Desactivar listado de directorios
+Options -Indexes
+
+# Denegar acceso a archivos sensibles
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+<Files ".env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</Files>
+
+<Files ".env.example">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</Files>
+
+# Denegar acceso a .git, composer, etc.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^\.git - [F,L]
+    RewriteRule ^\.env - [F,L]
+    RewriteRule \.sql$ - [F,L]
+    RewriteRule \.md$ - [F,L]
+</IfModule>

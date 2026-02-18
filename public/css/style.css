@@ -1,0 +1,218 @@
+:root{
+    /* Paleta acorde al logo: rojo / verde / negro */
+    --brand-red:#b10f2e;
+    --brand-green:#178a3a;
+    --brand-black:#0b0f14;
+
+    /* Corte de caña: tonos verdes, ámbar y tierra */
+    --cane-green:#0d4d2b;
+    --cane-green-light:#1a6b3c;
+    --cane-leaf:#2d5a3d;
+    --cane-amber:#c49a3a;
+    --cane-amber-light:#e8d4a0;
+    --cane-earth:#5c4033;
+    --cane-cream:#f5f0e6;
+
+    /* Bootstrap theme overrides */
+    --bs-primary: var(--brand-green);
+    --bs-primary-rgb: 23,138,58;
+    --bs-danger: var(--brand-red);
+    --bs-danger-rgb: 177,15,46;
+    --bs-dark: var(--brand-black);
+    --bs-dark-rgb: 11,15,20;
+    --bs-link-color: var(--brand-green);
+    --bs-link-hover-color: #0f6d2c;
+}
+
+/* spacing for fixed navbar */
+.pt-nav{ padding-top: 76px; }
+
+.bg-sindicato{
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='120' viewBox='0 0 60 120'%3E%3Cg fill='none' stroke='%23e8d4a0' stroke-opacity='0.06' stroke-width='0.5'%3E%3Cpath d='M15 0v120 M30 0v120 M45 0v120'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(90deg, var(--brand-black), #0d1f14 40%, #0f2f1a 60%, var(--brand-green));
+}
+
+.btn-primary{
+    --bs-btn-bg: var(--brand-green);
+    --bs-btn-border-color: var(--brand-green);
+    --bs-btn-hover-bg: #0f6d2c;
+    --bs-btn-hover-border-color: #0f6d2c;
+}
+.btn-danger{
+    --bs-btn-bg: var(--brand-red);
+    --bs-btn-border-color: var(--brand-red);
+    --bs-btn-hover-bg: #960c25;
+    --bs-btn-hover-border-color: #960c25;
+}
+.btn-outline-primary{
+    --bs-btn-color: var(--brand-green);
+    --bs-btn-border-color: rgba(23,138,58,.45);
+    --bs-btn-hover-bg: var(--brand-green);
+    --bs-btn-hover-border-color: var(--brand-green);
+}
+
+.hero{
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='200' viewBox='0 0 80 200'%3E%3Cg fill='none' stroke='%23e8d4a0' stroke-opacity='0.08' stroke-width='1'%3E%3Cpath d='M10 0v200 M30 0v200 M50 0v200 M70 0v200'/%3E%3C/g%3E%3C/svg%3E"),
+        radial-gradient(1200px 600px at 15% 15%, rgba(177,15,46,.38), transparent 60%),
+        radial-gradient(900px 500px at 85% 25%, rgba(23,138,58,.35), transparent 55%),
+        radial-gradient(800px 400px at 50% 80%, rgba(196,154,58,.12), transparent 50%),
+        linear-gradient(180deg, rgba(11,15,20,1), rgba(13,77,43,0.95) 40%, rgba(11,15,20,.92));
+    border-bottom: 1px solid rgba(232,212,160,.15);
+}
+
+.hero-kicker{
+    background: rgba(11,15,20,.55);
+    border: 1px solid rgba(23,138,58,.25);
+    color: rgba(255,255,255,.9);
+}
+.hero-title{
+    letter-spacing: .4px;
+}
+.hero-subtitle{
+    font-size: 0.55em;
+    font-weight: 600;
+    color: rgba(255,255,255,.72);
+}
+.hero-badge{
+    background: rgba(23,138,58,.18);
+    color: rgba(255,255,255,.9);
+    border: 1px solid rgba(23,138,58,.25);
+}
+
+.hero-card{
+    background: rgba(11,15,20,.55);
+    color: rgba(255,255,255,.92);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 18px;
+    box-shadow: 0 14px 40px rgba(0,0,0,.22);
+    backdrop-filter: blur(10px);
+}
+
+.mini-stat{
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+}
+.mini-stat i{ font-size: 20px; color: var(--brand-red); }
+.mini-stat .text-secondary{ color: rgba(255,255,255,.70) !important; }
+
+/* ===== Fondo alusivo al corte de caña de azúcar ===== */
+body.landing-page {
+    background: var(--cane-cream);
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='400' viewBox='0 0 120 400'%3E%3Cg fill='none' stroke='%232d5a3d' stroke-opacity='0.06' stroke-width='0.5'%3E%3Cpath d='M20 0v400'/%3E%3Cpath d='M20 0v400' transform='translate(20,0)'/%3E%3Cpath d='M20 0v400' transform='translate(40,0)'/%3E%3Cpath d='M20 0v400' transform='translate(60,0)'/%3E%3Cpath d='M20 0v400' transform='translate(80,0)'/%3E%3Cpath d='M20 0v400' transform='translate(100,0)'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(232,212,160,0.15) 0%, transparent 100%),
+        linear-gradient(90deg, rgba(45,90,61,0.03) 0%, transparent 50%, rgba(196,154,58,0.04) 100%),
+        linear-gradient(180deg, #f8f5f0 0%, #f5f0e6 50%, #f0ebe0 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+main.pt-nav {
+    position: relative;
+}
+
+.section{ padding: 64px 0; }
+.section-alt{
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='400' viewBox='0 0 120 400'%3E%3Cg fill='none' stroke='%231a6b3c' stroke-opacity='0.04' stroke-width='0.5'%3E%3Cpath d='M20 0v400'/%3E%3Cpath d='M20 0v400' transform='translate(20,0)'/%3E%3Cpath d='M20 0v400' transform='translate(40,0)'/%3E%3Cpath d='M20 0v400' transform='translate(60,0)'/%3E%3Cpath d='M20 0v400' transform='translate(80,0)'/%3E%3Cpath d='M20 0v400' transform='translate(100,0)'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(232,212,160,0.12) 0%, rgba(245,240,230,0.5) 100%);
+}
+.section-title{ margin-bottom: 18px; }
+
+.icon-pill{
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items:center;
+    font-size: 20px;
+}
+
+.news-img{
+    height: 180px;
+    object-fit: cover;
+}
+
+.benefit{
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(45,90,61,0.12);
+    border-radius: 16px;
+    padding: 18px;
+    height: 100%;
+    box-shadow: 0 2px 12px rgba(92,64,51,0.06);
+}
+.benefit i{
+    font-size: 26px;
+    color: var(--brand-green);
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.gallery-tile{
+    position: relative;
+    display: block;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(45,90,61,0.15);
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 12px rgba(92,64,51,0.06);
+    text-decoration: none;
+    color: inherit;
+}
+.gallery-tile img{
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display:block;
+    transition: transform .25s ease;
+}
+.gallery-tile:hover img{ transform: scale(1.03); }
+.gallery-caption{
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 10px 12px;
+    font-size: 12px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.7));
+    color: #fff;
+}
+
+.doc-icon{
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display:grid;
+    place-items:center;
+    background: rgba(177,15,46,.12);
+    color: var(--brand-red);
+    font-size: 20px;
+}
+
+.person-img{
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Cards con tono caña */
+.landing-page .card {
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(45,90,61,0.12);
+    box-shadow: 0 2px 16px rgba(92,64,51,0.06);
+}
+
+.footer {
+    background: linear-gradient(180deg, #0d1f14 0%, #0b0f14 100%) !important;
+    border-top: 2px solid rgba(196,154,58,0.2);
+}
+
+.footer a{ text-decoration: none; }
+
+@media (max-width: 576px){
+    .section{ padding: 52px 0; }
+    .pt-nav{ padding-top: 72px; }
+    .news-img{ height: 160px; }
+    .gallery-tile img{ height: 140px; }
+}
+

@@ -1,0 +1,205 @@
+/* Defensor Laboral IA - Chat widget */
+#defensor-chat-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-green), #0f6d2c);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 20px rgba(23, 138, 58, 0.4);
+    cursor: pointer;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#defensor-chat-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 24px rgba(23, 138, 58, 0.5);
+}
+
+#defensor-chat-toggle svg {
+    width: 28px;
+    height: 28px;
+}
+
+#defensor-chat-panel {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 48px);
+    height: 480px;
+    max-height: calc(100vh - 140px);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+#defensor-chat-panel.open {
+    display: flex;
+}
+
+.defensor-chat-header {
+    background: linear-gradient(135deg, var(--brand-green), #0f6d2c);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.defensor-chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.defensor-chat-header p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.defensor-chat-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.defensor-chat-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.defensor-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8f9fa;
+}
+
+.defensor-msg {
+    max-width: 90%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.defensor-msg.user {
+    align-self: flex-end;
+    background: var(--brand-green);
+    color: white;
+}
+
+.defensor-msg.bot {
+    align-self: flex-start;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.defensor-msg.bot strong {
+    color: var(--brand-green);
+}
+
+.defensor-msg .defensor-loading {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.defensor-msg .defensor-loading span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand-green);
+    animation: defensor-bounce 1.4s ease-in-out infinite both;
+}
+
+.defensor-msg .defensor-loading span:nth-child(1) { animation-delay: 0s; }
+.defensor-msg .defensor-loading span:nth-child(2) { animation-delay: 0.2s; }
+.defensor-msg .defensor-loading span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes defensor-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+.defensor-chat-input-wrap {
+    padding: 12px 16px;
+    background: white;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.defensor-chat-input-wrap form {
+    display: flex;
+    gap: 8px;
+}
+
+.defensor-chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 24px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.defensor-chat-input:focus {
+    border-color: var(--brand-green);
+}
+
+.defensor-chat-send {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--brand-green);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.defensor-chat-send:hover {
+    background: #0f6d2c;
+}
+
+.defensor-chat-send:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Markdown simple: **texto** -> negrita */
+.defensor-msg.bot .defensor-content {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

@@ -1,0 +1,29 @@
+# Dependencias
+node_modules/
+vendor/
+Defensor Laboral IA/venv/
+Defensor Laboral IA/rag_sitracabana/venv/
+
+# Configuración con secretos (usa app.example.php como plantilla)
+config/app.php
+
+# Logs y caché
+*.log
+storage/
+cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/

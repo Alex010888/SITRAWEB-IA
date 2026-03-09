@@ -59,10 +59,11 @@ class AuthController
                 $this->errorResponse("Email y password son requeridos", 400);
             }
 
-            $email = trim($input['email']);
+            // Misma normalización que al registrar: trim + minúsculas (tabla usuarios)
+            $email = strtolower(trim((string) $input['email']));
             $password = $input['password'];
 
-            // Buscar usuario
+            // Buscar usuario en la tabla usuarios
             $user = $this->userModel->findByEmail($email);
 
             if (!$user) {

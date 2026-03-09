@@ -29,8 +29,8 @@ return [
 
     // API key desde variable de entorno (nunca commitear la clave en el repo)
     'defensor_llm_api_key' => getenv('DEFENSOR_LLM_API_KEY') ?: '',
-    'defensor_llm_provider' => getenv('DEFENSOR_LLM_PROVIDER') ?: 'openai',
-    'defensor_llm_model' => getenv('DEFENSOR_LLM_MODEL') ?: 'gpt-4o-mini',
+    'defensor_llm_provider' => getenv('DEFENSOR_LLM_PROVIDER') ?: 'ollama',
+    'defensor_llm_model' => getenv('DEFENSOR_LLM_MODEL') ?: 'llama3.2',
     // URLs del Defensor: DEFENSOR_SEMANTIC_URL / DEFENSOR_LANGCHAIN_URL (completas) o DEFENSOR_HOST + DEFENSOR_PORT (Render)
     'defensor_semantic_url' => _defensor_url('DEFENSOR_SEMANTIC_URL', '/api/search'),
     'defensor_langchain_url' => _defensor_url('DEFENSOR_LANGCHAIN_URL', '/api/consulta'),

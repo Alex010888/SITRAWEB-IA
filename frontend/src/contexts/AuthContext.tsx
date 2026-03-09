@@ -37,23 +37,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     try {
       const response = await apiService.login(email, password);
+      // API devuelve { success, message, data: { token, user } }
+      const data = response?.data ?? response;
+      const tokenVal = data?.token ?? response?.token;
+      const userVal = data?.user ?? response?.user;
 
-      if (response.success) {
-        const { token: newToken, user: newUser } = response.data;
-
-        // Guardar en localStorage
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('user', JSON.stringify(newUser));
-
-        // Actualizar estado
-        setToken(newToken);
-        setUser(newUser);
+      if (response?.success && tokenVal && userVal) {
+        localStorage.setItem('token', tokenVal);
+        localStorage.setItem('user', JSON.stringify(userVal));
+        setToken(tokenVal);
+        setUser(userVal);
       } else {
-        throw new Error(response.message || 'Error al iniciar sesión');
+        throw new Error(response?.message || data?.message || 'Error al iniciar sesión');
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Error al iniciar sesión';
-      throw new Error(message);
+      const msg = error.response?.data?.message ?? error.message ?? 'Error al iniciar sesión';
+      const detail = error.response?.status === 401 ? ' Revisa email y contraseña.' : '';
+      throw new Error(msg + detail);
     }
   };
 

@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost/sitra_web/backend/public/api';
+// En desarrollo usar proxy de Vite (/api) para evitar CORS y apuntar al backend correcto
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.DEV ? '/api' : 'http://localhost/sitra_web/backend/public/api');
 
 class ApiService {
   private api: AxiosInstance;
@@ -21,10 +23,10 @@ class ApiService {
           config.headers.Authorization = `Bearer ${token}`;
         }
         // Con FormData no enviar Content-Type: el navegador lo pondrá con boundary
-        if (config.data instanceof FormData && config.headers) {
-          const headers = { ...config.headers } as Record<string, unknown>;
+        if (config.data instanceof FormData && config.headers && typeof config.headers === 'object') {
+          const headers = { ...config.headers } as Record<string, string>;
           delete headers['Content-Type'];
-          config.headers = headers;
+          config.headers = headers as typeof config.headers;
         }
         return config;
       },

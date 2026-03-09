@@ -20,8 +20,9 @@ class User
     }
 
     /**
-     * Busca un usuario por email
-     * 
+     * Busca un usuario por email (tabla usuarios).
+     * Comparación insensible a mayúsculas para coincidir con el registro.
+     *
      * @param string $email
      * @return array|null Usuario o null si no existe
      */
@@ -30,7 +31,7 @@ class User
         $stmt = $this->db->prepare(
             "SELECT id, nombre, email, password, rol, activo, created_at 
              FROM usuarios 
-             WHERE email = :email 
+             WHERE LOWER(TRIM(email)) = LOWER(TRIM(:email)) 
              LIMIT 1"
         );
 

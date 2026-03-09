@@ -13,6 +13,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
+try:
+    from langchain_ollama import ChatOllama
+except ImportError:
+    ChatOllama = None
 
 import faiss
 import json
@@ -29,12 +33,11 @@ def load_config() -> dict:
     """Carga config desde config/app.php o variables de entorno."""
     config = {
         "api_key": None,
-        "provider": "openai",
-        "model": "gpt-4o-mini",
+        "provider": "ollama",
+        "model": "llama3.2",
     }
     import os
-    if os.environ.get("OPENAI_API_KEY"):
-        config["api_key"] = os.environ["OPENAI_API_KEY"]
+    config["api_key"] = os.environ.get("DEFENSOR_LLM_API_KEY") or os.environ.get("OPENAI_API_KEY") or config["api_key"]
     if os.environ.get("DEFENSOR_LLM_PROVIDER"):
         config["provider"] = os.environ["DEFENSOR_LLM_PROVIDER"]
     if os.environ.get("DEFENSOR_LLM_MODEL"):
@@ -152,16 +155,27 @@ def build_chain():
     retriever = FAISSRetriever(index=index, meta=meta, model=model, k=8, min_score=0.15)
 
     config = load_config()
-    if not config["api_key"]:
-        raise ValueError("Configura defensor_llm_api_key en config/app.php o OPENAI_API_KEY")
+    provider = (config.get("provider") or "openai").lower()
+    api_key = config.get("api_key") or ""
 
     import os
-    if config["provider"] == "groq":
-        os.environ["GROQ_API_KEY"] = config["api_key"]
-        llm = ChatGroq(model=config["model"], temperature=0.1)
+    if provider == "ollama":
+        if ChatOllama is None:
+            raise ValueError("Para usar Ollama instala: pip install langchain-ollama")
+        # Ollama es gratis y local: no requiere API key. Debe estar corriendo (ollama serve).
+        base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+        model = config.get("model") or "llama3.2"
+        llm = ChatOllama(model=model, base_url=base_url, temperature=0.1)
+    elif provider == "groq":
+        if not api_key:
+            raise ValueError("Con provider=groq configura DEFENSOR_LLM_API_KEY con tu API key de Groq (gratis en groq.com)")
+        os.environ["GROQ_API_KEY"] = api_key
+        llm = ChatGroq(model=config.get("model") or "llama-3.1-8b-instant", temperature=0.1)
     else:
-        os.environ["OPENAI_API_KEY"] = config["api_key"]
-        llm = ChatOpenAI(model=config["model"], temperature=0.1)
+        if not api_key:
+            raise ValueError("Configura DEFENSOR_LLM_API_KEY o OPENAI_API_KEY en config/app.php / variables de entorno")
+        os.environ["OPENAI_API_KEY"] = api_key
+        llm = ChatOpenAI(model=config.get("model") or "gpt-4o-mini", temperature=0.1)
 
     system_prompt = """Eres un ASESOR SINDICAL experto. Orientación con PRECISIÓN LEGAL y TRAZABILIDAD de fuentes.
 

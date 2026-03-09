@@ -1,14 +1,20 @@
 # SITRACABAÑA - Blueprint para Render
-# Conectar el repo en dashboard.render.com y usar "New > Blueprint" para crear los servicios.
+# Conectar el repo en dashboard.render.com → New → Blueprint
 
 services:
-  # Backend PHP (sitio principal + API)
+  # API Backend (PHP) - login, usuarios, CMS
   - type: web
     runtime: docker
     name: sitra-web
-    dockerfilePath: docker/Dockerfile.render.web
+    dockerfilePath: docker/Dockerfile.render.api
     dockerContext: .
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sitra-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
       - key: DEFENSOR_HOST
         fromService:
           name: sitra-defensor
@@ -19,18 +25,16 @@ services:
           name: sitra-defensor
           type: web
           property: port
-    healthCheckPath: /
+    healthCheckPath: /api/health
 
-  # Defensor Laboral IA (RAG Python). Requiere data/index/ (faiss.index, meta.jsonl) en el repo.
+  # Defensor Laboral IA (RAG Python) - modo standalone (FAISS, sin LLM).
+  # En local se puede usar Ollama con app_langchain.py; en Render solo búsqueda semántica.
   - type: web
     runtime: python
     name: sitra-defensor
     rootDir: Defensor Laboral IA/rag_sitracabana
     buildCommand: pip install -r requirements.txt
     startCommand: python app_standalone.py
-    envVars:
-      - key: OPENAI_API_KEY
-        sync: false
 
   # Frontend (React + Vite) - sitio estático
   - type: web
@@ -40,6 +44,10 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
-      # URL pública del backend PHP; ajustar si el servicio web tiene otro nombre
       - key: VITE_API_URL
-        value: https://sitra-web.onrender.com/backend/public/api
+        value: https://sitra-web.onrender.com/api
+
+databases:
+  - name: sitra-db
+    databaseName: sitra_web
+    plan: free

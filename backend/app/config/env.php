@@ -7,7 +7,7 @@
 function loadEnv(string $path): void
 {
     if (!file_exists($path)) {
-        throw new RuntimeException("Archivo .env no encontrado: {$path}");
+        return; // En Render/entornos cloud las variables se inyectan por entorno
     }
 
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

@@ -44,6 +44,14 @@ class Router
         // ============================================
         // RUTAS PÚBLICAS (sin autenticación)
         // ============================================
+
+        // GET /api/health (para Render y load balancers)
+        if ($this->method === 'GET' && $this->path === '/api/health') {
+            http_response_code(200);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'API OK']);
+            return;
+        }
         
         // POST /api/auth/login
         if ($this->method === 'POST' && $this->path === '/api/auth/login') {

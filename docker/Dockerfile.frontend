@@ -1,0 +1,12 @@
+# Frontend React + Vite (desarrollo). Build desde raíz: docker build -f docker/Dockerfile.frontend .
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install
+
+COPY frontend/ .
+ENV VITE_HOST=0.0.0.0
+EXPOSE 3000
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

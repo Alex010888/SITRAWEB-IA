@@ -1,0 +1,13 @@
+# Para builds Docker (incl. Render)
+.git
+.gitignore
+*.md
+node_modules
+frontend/node_modules
+.env
+.env.*
+!.env.docker.example
+*.log
+Defensor Laboral IA/rag_sitracabana/__pycache__
+Defensor Laboral IA/rag_sitracabana/data/logs
+*.pyc

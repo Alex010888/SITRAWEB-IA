@@ -18,6 +18,11 @@ $onHome = (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/') === (
                 <li class="nav-item"><a class="nav-link" href="<?= e(url('/#galeria')) ?>">Galería</a></li>
                 <li class="nav-item"><a class="nav-link" href="<?= e(url('/#documentos')) ?>">Documentos</a></li>
                 <li class="nav-item"><a class="nav-link" href="<?= e(url('/#directiva')) ?>">Directiva</a></li>
+                <li class="nav-item">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal" aria-label="Guía de uso">
+                        <i class="bi bi-question-circle me-1"></i> Ayuda
+                    </button>
+                </li>
                 <li class="nav-item ms-lg-2">
                     <a class="btn btn-danger btn-sm fw-semibold" href="<?= e(url('/#afiliacion')) ?>">
                         <i class="bi bi-person-plus me-1"></i> Afíliate ahora

@@ -40,9 +40,7 @@ final class Database
                 ]
             );
         } catch (PDOException $e) {
-            http_response_code(500);
-            echo 'Error de conexión a la base de datos.';
-            exit;
+            throw $e;
         }
 
         return self::$pdo;

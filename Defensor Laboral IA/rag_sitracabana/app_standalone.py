@@ -38,6 +38,18 @@ def load_resources():
     return _index, _meta, _model
 
 
+def _doc_name(source: str) -> str:
+    return "Contrato Colectivo SITRACABAÑA" if source == "cct_sitracabana" else "Código de Trabajo"
+
+
+def _ref_label(md: dict) -> str:
+    ref_type = md.get("ref_type", "")
+    ref_num = md.get("ref_num")
+    if ref_num:
+        return f"{ref_type} {ref_num}".strip() if ref_type else str(ref_num)
+    return ""
+
+
 def search(query: str, k: int = 8, min_score: float = 0.2):
     """Busca los chunks más relevantes para la consulta (búsqueda semántica con embeddings)."""
     index, meta, model = load_resources()
@@ -53,6 +65,9 @@ def search(query: str, k: int = 8, min_score: float = 0.2):
         if score_val < min_score:
             continue
         rec["score"] = score_val
+        md = rec.get("metadata", {})
+        rec["source"] = _doc_name(md.get("source", ""))
+        rec["ref"] = _ref_label(md)
         results.append(rec)
     return results
 
@@ -192,10 +207,13 @@ class DefensorHandler(BaseHTTPRequestHandler):
 
 
 def main():
+    import os
+    port = int(os.environ.get("PORT", "5000"))
+    host = "0.0.0.0"  # Render y Docker requieren escuchar en todas las interfaces
     print("Iniciando Defensor Laboral IA...")
     load_resources()
-    print("Modelo e índice cargados. Servidor en http://127.0.0.1:5000")
-    server = HTTPServer(("127.0.0.1", 5000), DefensorHandler)
+    print(f"Modelo e índice cargados. Servidor en http://{host}:{port}")
+    server = HTTPServer((host, port), DefensorHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

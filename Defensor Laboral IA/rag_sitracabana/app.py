@@ -168,7 +168,10 @@ def health():
 
 
 if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", "5000"))
+    host = "0.0.0.0"
     print("Iniciando Defensor Laboral IA...")
     load_resources()
-    print("Modelo e índice cargados. Servidor en http://127.0.0.1:5000")
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    print(f"Modelo e índice cargados. Servidor en http://{host}:{port}")
+    app.run(host=host, port=port, debug=False)

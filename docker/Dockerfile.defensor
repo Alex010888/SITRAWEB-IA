@@ -1,0 +1,19 @@
+# Defensor Laboral IA - RAG (FAISS + LangChain/standalone)
+# Build desde raíz del repo: docker build -f docker/Dockerfile.defensor .
+FROM python:3.11-slim
+
+# Estructura: /app = raíz sitra_web (defensor_chain usa parent.parent = raíz)
+WORKDIR /app
+
+COPY config ./config
+COPY "Defensor Laboral IA/rag_sitracabana/requirements.txt" "Defensor Laboral IA/rag_sitracabana/"
+
+RUN pip install --no-cache-dir -r "Defensor Laboral IA/rag_sitracabana/requirements.txt"
+
+COPY "Defensor Laboral IA/rag_sitracabana" "Defensor Laboral IA/rag_sitracabana/"
+# Índice FAISS: montar en runtime con volume (data/index) desde el host
+
+WORKDIR "/app/Defensor Laboral IA/rag_sitracabana"
+
+EXPOSE 5000
+CMD ["/bin/sh", "-c", "python -c 'from defensor_chain import get_chain' 2>/dev/null && exec python app_langchain.py || exec python app_standalone.py"]

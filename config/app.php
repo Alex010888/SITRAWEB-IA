@@ -1,58 +1,37 @@
 <?php
 /**
  * Configuración general de la app.
+ * Copia este archivo como config/app.php y ajusta los valores.
  */
+
+if (!function_exists('_defensor_url')) {
+    function _defensor_url(string $urlKey, string $path): string
+    {
+        $full = getenv($urlKey);
+        if (is_string($full) && $full !== '') {
+            return $full;
+        }
+        $host = getenv('DEFENSOR_HOST');
+        $port = getenv('DEFENSOR_PORT');
+        if (is_string($host) && $host !== '' && is_string($port) && $port !== '') {
+            return 'http://' . $host . ':' . $port . $path;
+        }
+        return 'http://127.0.0.1:5000' . $path;
+    }
+}
 
 return [
     'name' => 'SITRACABAÑA',
     'timezone' => 'America/Guatemala',
-
-    /**
-     * Base URL (opcional).
-     * - Dejar null para autodetección.
-     * - Ejemplo si está en subcarpeta: '/sitra_web'
-     */
     'base_url' => null,
-
-    /**
-     * URL base de uploads del backend (para fotos de directiva, logo subido, etc.).
-     * Sin /uploads al final. Ej: http://localhost/sitra_web/backend
-     */
     'backend_uploads_base' => null,
-
-    /**
-     * Seguridad: mantener en false hasta tener panel/admin con login.
-     * Si lo activas en true, se habilita el endpoint POST /galeria/subir.
-     */
     'public_gallery_upload' => false,
 
-    /**
-     * Defensor Laboral IA - LLM para síntesis RAG.
-     * Poner tu API key para respuestas más naturales. Sin key = solo recuperación.
-     * Groq (gratis): https://console.groq.com → API Keys
-     * OpenAI: https://platform.openai.com
-     */
-    'defensor_llm_api_key' => '',
-
-    /** Proveedor: 'groq' (gratis) o 'openai' */
-    'defensor_llm_provider' => 'openai',
-
-    /** Modelo. Groq: llama-3.1-8b-instant. OpenAI: gpt-4o-mini, gpt-4o */
-    'defensor_llm_model' => 'gpt-4o-mini',
-
-    /**
-     * Búsqueda semántica (embeddings).
-     * Si está configurado, PHP llama al microservicio Python para búsqueda por similitud.
-     * Ejemplo: 'http://127.0.0.1:5000/api/search'
-     * Dejar null para usar solo búsqueda por palabras. Si falla, hace fallback automático.
-     */
-    'defensor_semantic_url' => 'http://127.0.0.1:5000/api/search',  // null = solo búsqueda por palabras
-
-    /**
-     * API LangChain (RAG completo: FAISS + chain + LLM).
-     * Si está configurado, PHP delega toda la consulta al microservicio LangChain.
-     * Dejar null para usar el flujo PHP (búsqueda + LLM en PHP).
-     */
-    'defensor_langchain_url' => 'http://127.0.0.1:5000/api/consulta',
+    // API key desde variable de entorno (nunca commitear la clave en el repo)
+    'defensor_llm_api_key' => getenv('DEFENSOR_LLM_API_KEY') ?: '',
+    'defensor_llm_provider' => getenv('DEFENSOR_LLM_PROVIDER') ?: 'openai',
+    'defensor_llm_model' => getenv('DEFENSOR_LLM_MODEL') ?: 'gpt-4o-mini',
+    // URLs del Defensor: DEFENSOR_SEMANTIC_URL / DEFENSOR_LANGCHAIN_URL (completas) o DEFENSOR_HOST + DEFENSOR_PORT (Render)
+    'defensor_semantic_url' => _defensor_url('DEFENSOR_SEMANTIC_URL', '/api/search'),
+    'defensor_langchain_url' => _defensor_url('DEFENSOR_LANGCHAIN_URL', '/api/consulta'),
 ];
-

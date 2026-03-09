@@ -160,6 +160,16 @@ final class DefensorService
         'sexagésima' => 60,
     ];
 
+    /** Ordinales para "primer artículo", "artículo quincuagésimo", etc. */
+    private const ORDINALES_ARTICULO = [
+        'primer' => 1, 'primero' => 1, 'segundo' => 2, 'tercer' => 3, 'tercero' => 3,
+        'cuarto' => 4, 'quinto' => 5, 'sexto' => 6, 'séptimo' => 7, 'septimo' => 7,
+        'octavo' => 8, 'noveno' => 9, 'décimo' => 10, 'decimo' => 10,
+        'undécimo' => 11, 'duodécimo' => 12, 'decimotercero' => 13, 'decimocuarto' => 14,
+        'decimoquinto' => 15, 'vigésimo' => 20, 'vigesimo' => 20, 'trigésimo' => 30,
+        'cuadragésimo' => 40, 'quincuagésimo' => 50, 'sexagésimo' => 60,
+    ];
+
     /**
      * Extrae el número de cláusula si el usuario pide una cláusula específica.
      * Soporta: "cláusula 7", "primera cláusula", "décima cláusula", "la segunda cláusula"
@@ -191,6 +201,67 @@ final class DefensorService
         }
 
         return null;
+    }
+
+    /**
+     * Extrae el número de artículo si el usuario pide un artículo específico del Código de Trabajo.
+     * Soporta: "artículo 55", "art 55", "art 55 del código de trabajo", "primer artículo"
+     */
+    private function parseArticleNumber(string $pregunta): ?int
+    {
+        $q = mb_strtolower($pregunta);
+
+        if (preg_match('/\b(?:art[ií]culo|art\.?)\s+(\d{1,4})\b/ui', $q, $m)) {
+            $n = (int) $m[1];
+            return $n >= 1 ? $n : null;
+        }
+        if (preg_match('/\b(?:art[ií]culo|art\.?)\s+(\d{1,4})\s+(?:del?\s+)?c[oó]digo\s+(?:de\s+)?trabajo/ui', $q, $m)) {
+            $n = (int) $m[1];
+            return $n >= 1 ? $n : null;
+        }
+        if (preg_match('/\bc[oó]digo\s+(?:de\s+)?trabajo.*(?:art[ií]culo|art\.?)\s+(\d{1,4})\b/ui', $q, $m)) {
+            $n = (int) $m[1];
+            return $n >= 1 ? $n : null;
+        }
+
+        if (preg_match('/\b(?:el\s+)?([a-záéíóúñ]+)\s+art[ií]culo\b/ui', $q, $m)) {
+            $ord = mb_strtolower(trim($m[1]));
+            if (isset(self::ORDINALES_ARTICULO[$ord])) {
+                return self::ORDINALES_ARTICULO[$ord];
+            }
+        }
+        if (preg_match('/\bart[ií]culo\s+([a-záéíóúñ]+)\b/ui', $q, $m)) {
+            $ord = mb_strtolower(trim($m[1]));
+            if (isset(self::ORDINALES_ARTICULO[$ord])) {
+                return self::ORDINALES_ARTICULO[$ord];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtiene los chunks de un artículo específico del Código de Trabajo.
+     * @return array<int, array{id: string, text: string, metadata: array}>
+     */
+    private function getArticleByNumber(int $num): array
+    {
+        $chunks = $this->loadChunks();
+        $refNum = (string) $num;
+        $found = [];
+        foreach ($chunks as $chunk) {
+            $md = $chunk['metadata'] ?? [];
+            if (($md['source'] ?? '') !== 'codigo_trabajo') {
+                continue;
+            }
+            if ((string)($md['ref_num'] ?? '') !== $refNum) {
+                continue;
+            }
+            $part = (int)($md['part'] ?? 1);
+            $found[$part] = $chunk;
+        }
+        ksort($found);
+        return array_values($found);
     }
 
     /**
@@ -723,13 +794,19 @@ final class DefensorService
         });
         $items = array_slice($items, 0, 3);
 
+        $fuentesList = [];
         foreach ($items as $item) {
             $refLabel = $this->formatRefLabel($item['ref'], $item['doc']);
             $parts[] = '**' . $refLabel . '** (' . $item['doc'] . '):';
             $parts[] = $this->trimText($item['text']);
             $parts[] = '';
+            $abrev = ($item['doc'] ?? '') === 'Contrato Colectivo SITRACABAÑA' ? 'CC' : 'CT';
+            $fuentesList[] = $refLabel . ' ' . $abrev;
         }
-
+        if ($fuentesList !== []) {
+            $parts[] = '*Fuentes: ' . implode(', ', $fuentesList) . '*';
+            $parts[] = '';
+        }
         if ($this->isDespidoQuery($pregunta)) {
             $parts[] = 'Asesoría: Juez de Trabajo o SITRACABAÑA — contacto@sitra-lacabana.org';
         } else {
@@ -746,6 +823,7 @@ final class DefensorService
     {
         $parts = [];
         $seenKeys = [];
+        $idx = 1;
 
         foreach ($results as $r) {
             $md = $r['metadata'] ?? [];
@@ -764,13 +842,36 @@ final class DefensorService
             }
             $seenKeys[] = $key;
             $refLabel = $this->formatRefLabel($ref, $docName);
-            $citeKey = $refNum !== '' && $refNum !== null
+            $citeKey = $refNum !== ''
                 ? ($source === 'codigo_trabajo' ? "Art. {$refNum} (Código de Trabajo)" : "Cláusula {$refNum} (Contrato Colectivo SITRACABAÑA)")
-                : $refLabel . ' - ' . $docName;
-            $parts[] = "[FUENTE: {$citeKey}]\n{$refLabel} - {$docName}\n\n{$text}";
+                : $docName;
+            $parts[] = "[FRAGMENTO {$idx}] [CITA OBLIGATORIA: {$citeKey}]\n{$refLabel} - {$docName}\n\n{$text}";
+            $idx++;
         }
 
         return implode("\n\n---\n\n", array_slice($parts, 0, 6));
+    }
+
+    /**
+     * Verifica si la respuesta del LLM contiene al menos una cita del contexto (Art. X o Cláusula Y).
+     */
+    private function responseHasValidCitation(string $respuesta, array $results): bool
+    {
+        foreach ($results as $r) {
+            $md = $r['metadata'] ?? [];
+            $refNum = (string)($md['ref_num'] ?? '');
+            $source = $md['source'] ?? '';
+            if ($refNum === '') {
+                continue;
+            }
+            if ($source === 'codigo_trabajo' && preg_match('/\bart\.?\s*' . preg_quote($refNum, '/') . '\b/ui', $respuesta)) {
+                return true;
+            }
+            if ($source === 'cct_sitracabana' && preg_match('/\bcl[aá]usula\s*' . preg_quote($refNum, '/') . '\b/ui', $respuesta)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -789,14 +890,18 @@ final class DefensorService
             return null;
         }
 
-        $systemPrompt = 'Eres un ASESOR SINDICAL experto que representa a los trabajadores de SITRACABAÑA (Ingenio La Cabaña). Tu rol es dar orientación estratégica, sugerencias concretas y citar con precisión las normas que protegen al trabajador.' . "\n\n"
-            . 'REGLAS CRÍTICAS:' . "\n"
-            . '- **PRIORIZA el Contrato Colectivo SITRACABAÑA**: si hay cláusulas relevantes, cítalas PRIMERO antes que el Código de Trabajo.' . "\n"
-            . '- **Si un fragmento del contexto NO responde la pregunta del usuario, NO lo uses.** Solo usa información que sea directamente relevante.' . "\n"
-            . '- **Cita SIEMPRE** el Art. X o Cláusula Y exacta. Ejemplo: "Según la Cláusula 55 del Contrato Colectivo..." o "El Art. 58 del Código de Trabajo..."' . "\n"
-            . '- **Si no hay información relevante en el contexto**, di explícitamente: "No encontré información sobre esto en los documentos." Luego recomienda contactar al sindicato: contacto@sitra-lacabana.org' . "\n"
-            . '- Usa ÚNICAMENTE la información del contexto. No inventes artículos ni cláusulas.' . "\n"
-            . '- Responde siempre en español.' . "\n\n"
+        $systemPrompt = 'Eres un ASESOR SINDICAL experto que representa a los trabajadores de SITRACABAÑA (Ingenio La Cabaña). Tu rol es dar orientación con PRECISIÓN LEGAL y TRAZABILIDAD de fuentes.' . "\n\n"
+            . 'REGLAS ANTI-ALUCINACIÓN (OBLIGATORIAS):' . "\n"
+            . '- **PROHIBIDO** inventar, inferir o extrapolar información que NO esté explícita en el contexto.' . "\n"
+            . '- **PROHIBIDO** citar Art. X o Cláusula Y que no aparezcan en el contexto. Solo cita las fuentes listadas en [CITA OBLIGATORIA: ...].' . "\n"
+            . '- **PROHIBIDO** dar números, plazos o montos que no figuren literalmente en el contexto.' . "\n"
+            . '- Si un fragmento NO responde la pregunta, NO lo uses. Responde solo con lo que el contexto permita.' . "\n\n"
+            . 'TRAZABILIDAD Y CITAS (OBLIGATORIAS):' . "\n"
+            . '- **Cada afirmación legal** debe ir acompañada de su fuente: "Según Art. X del Código de Trabajo..." o "La Cláusula Y del Contrato Colectivo establece...".' . "\n"
+            . '- **Al final** incluye la línea: "Fuentes: Art. X CT, Cláusula Y CC" con las normas que efectivamente citaste.' . "\n"
+            . '- Prioriza Contrato Colectivo SITRACABAÑA antes que Código de Trabajo.' . "\n\n"
+            . 'Si NO hay información relevante en el contexto: responde "No encontré información sobre esto en los documentos." y recomienda: contacto@sitra-lacabana.org' . "\n"
+            . 'Responde siempre en español.' . "\n\n"
             . 'ESTRUCTURA DE TU RESPUESTA:' . "\n"
             . '1. **Respuesta directa**: Responde la pregunta en 1-2 oraciones.' . "\n"
             . '2. **Base legal**: Cita primero Cláusula Y (Contrato Colectivo) si aplica, luego Art. X (Código de Trabajo).' . "\n"
@@ -828,7 +933,7 @@ final class DefensorService
             ? "\n\nIMPORTANTE PARA AGUINALDO: Estructura tu respuesta en DOS BLOQUES: 1) PRIMERO lo que dice el Contrato Colectivo SITRACABAÑA (Cláusula 56 - AGUINALDOS); 2) DESPUÉS lo que dice el Código de Trabajo (Arts. 196-200)."
             : '';
 
-        $userPrompt = "CONTEXTO (fragmentos del Contrato Colectivo SITRACABAÑA y Código de Trabajo de El Salvador):\n\n{$context}\n\n---\n\nCONSULTA DEL TRABAJADOR: {$pregunta}{$ccNote}{$despidoNote}{$aguinaldoNote}\n\nResponde como asesor sindical. Prioriza el Contrato Colectivo: si hay cláusulas relevantes, cítalas primero. Solo usa fragmentos relevantes. Cita Art. X o Cláusula Y. Lista las fuentes al final.";
+        $userPrompt = "CONTEXTO (cada fragmento tiene [CITA OBLIGATORIA] - solo puedes citar estas fuentes exactas):\n\n{$context}\n\n---\n\nCONSULTA DEL TRABAJADOR: {$pregunta}{$ccNote}{$despidoNote}{$aguinaldoNote}\n\nResponde con precisión legal. Cita SOLO las fuentes del contexto. Cada afirmación debe tener su Art. X o Cláusula Y. Al final incluye: Fuentes: Art. X CT, Cláusula Y CC.";
 
         $client = new LlmClient(
             $apiKey,
@@ -842,10 +947,13 @@ final class DefensorService
                 ['role' => 'user', 'content' => $userPrompt],
             ],
             1200,
-            0.2
+            0.1
         );
 
-        return $response !== null && mb_strlen($response) > 20 ? $response : null;
+        if ($response === null || mb_strlen($response) < 20) {
+            return null;
+        }
+        return $response;
     }
 
     /**
@@ -1098,6 +1206,30 @@ final class DefensorService
             ];
         }
 
+        $articleNum = $this->parseArticleNumber($pregunta);
+        if ($articleNum !== null) {
+            $articleChunks = $this->getArticleByNumber($articleNum);
+            if ($articleChunks !== []) {
+                $textos = array_map(fn($c) => trim($c['text'] ?? ''), $articleChunks);
+                $textoCompleto = implode("\n\n", array_filter($textos));
+                $resp = "**Art. {$articleNum}** – Código de Trabajo (El Salvador)\n\n"
+                    . $this->trimText($textoCompleto, 2500);
+                if (mb_strlen($textoCompleto) > 2500) {
+                    $resp .= "\n\n*… (texto recortado). Para el texto completo: contacto@sitra-lacabana.org*";
+                }
+                return [
+                    'success' => true,
+                    'respuesta' => $resp,
+                    'fuentes' => [['source' => 'Código de Trabajo', 'ref' => "Art. {$articleNum}"]],
+                ];
+            }
+            return [
+                'success' => true,
+                'respuesta' => "**El Artículo {$articleNum} no existe** en el Código de Trabajo de El Salvador.\n\nVerifica que el número sea correcto. Si necesitas asesoría sobre algún artículo en particular, contacta al sindicato: contacto@sitra-lacabana.org",
+                'fuentes' => [],
+            ];
+        }
+
         $esPeticionAguinaldo = $this->isAguinaldoCalcRequest($pregunta);
         $ultimoPidioDatos = $this->lastBotAskedAguinaldoData($historial);
         if ($esPeticionAguinaldo || $ultimoPidioDatos) {
@@ -1148,6 +1280,8 @@ final class DefensorService
             error_log('[DefensorService] LLM falló: ' . $e->getMessage());
         }
         if ($respuesta === null) {
+            $respuesta = $respuestaFormateada;
+        } elseif ($results !== [] && !$this->responseHasValidCitation($respuesta, $results)) {
             $respuesta = $respuestaFormateada;
         } else {
             $respuestaLower = mb_strtolower($respuesta);

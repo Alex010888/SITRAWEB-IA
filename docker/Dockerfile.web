@@ -1,0 +1,27 @@
+# PHP + Apache para SITRACABAÑA (document root = public)
+FROM php:8.2-apache
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libzip-dev zip unzip \
+    && docker-php-ext-install pdo pdo_mysql zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Habilitar mod_rewrite y AllowOverride
+RUN a2enmod rewrite && \
+    sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
+WORKDIR /var/www/html
+
+# Copiar app, config y public (document root)
+COPY app ./app
+COPY config ./config
+COPY public ./public
+COPY backend ./backend
+
+# Apache document root = public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+EXPOSE 80
+CMD ["apache2-foreground"]

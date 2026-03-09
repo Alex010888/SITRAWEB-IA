@@ -108,6 +108,34 @@ class FAISSRetriever(BaseRetriever):
         return cct + ct
 
 
+def _is_zafra_query(pregunta: str) -> bool:
+    """Detecta si la consulta está relacionada con zafra (temporada de cosecha)."""
+    p = pregunta.lower().strip()
+    palabras = [
+        "zafra", "zafrero", "zafreros", "época de zafra", "temporada de zafra",
+        "inicio de zafra", "fin de zafra", "temporada de cosecha", "cosecha",
+        "periodo de zafra", "período de zafra", "mantenimiento y zafra",
+    ]
+    return any(pal in p for pal in palabras)
+
+
+def _merge_zafra_docs(docs_main: List[Document], docs_zafra: List[Document], max_docs: int = 10) -> List[Document]:
+    """Fusiona resultados poniendo primero los fragmentos que hablan de zafra (CCT), sin duplicar por id."""
+    seen = set()
+    out = []
+    for d in docs_zafra:
+        doc_id = d.metadata.get("id", "")
+        if doc_id and doc_id not in seen and d.metadata.get("source_raw") == "cct_sitracabana":
+            seen.add(doc_id)
+            out.append(d)
+    for d in docs_main:
+        doc_id = d.metadata.get("id", "")
+        if doc_id and doc_id not in seen:
+            seen.add(doc_id)
+            out.append(d)
+    return out[:max_docs]
+
+
 def build_chain():
     """Construye la cadena RAG: retriever → prompt → LLM."""
     if not FAISS_FILE.exists() or not META_FILE.exists():
@@ -130,28 +158,35 @@ def build_chain():
     import os
     if config["provider"] == "groq":
         os.environ["GROQ_API_KEY"] = config["api_key"]
-        llm = ChatGroq(model=config["model"], temperature=0.2)
+        llm = ChatGroq(model=config["model"], temperature=0.1)
     else:
         os.environ["OPENAI_API_KEY"] = config["api_key"]
-        llm = ChatOpenAI(model=config["model"], temperature=0.2)
+        llm = ChatOpenAI(model=config["model"], temperature=0.1)
 
-    system_prompt = """Eres un ASESOR SINDICAL experto que representa a los trabajadores de SITRACABAÑA (Ingenio La Cabaña).
+    system_prompt = """Eres un ASESOR SINDICAL experto. Orientación con PRECISIÓN LEGAL y TRAZABILIDAD de fuentes.
 
-REGLAS CRÍTICAS:
-- PRIORIZA SIEMPRE el Contrato Colectivo SITRACABAÑA: si hay cláusulas relevantes, cítalas PRIMERO antes que el Código de Trabajo.
-- Si un fragmento del contexto NO responde la pregunta del usuario, NO lo uses.
-- Cita SIEMPRE el Art. X o Cláusula Y exacta.
-- Si no hay información relevante, di: "No encontré información sobre esto en los documentos." Recomienda: contacto@sitra-lacabana.org
-- Usa ÚNICAMENTE la información del contexto. No inventes artículos ni cláusulas.
-- Responde siempre en español.
+REGLAS ANTI-ALUCINACIÓN (OBLIGATORIAS):
+- PROHIBIDO inventar, inferir o extrapolar información que NO esté explícita en el contexto.
+- PROHIBIDO citar Art. X o Cláusula Y que no aparezcan en el contexto. Solo cita las fuentes listadas.
+- PROHIBIDO dar números, plazos o montos que no figuren literalmente en el contexto.
+- Si un fragmento NO responde la pregunta, NO lo uses.
 
-ESTRUCTURA: 1) Respuesta directa (priorizando Contrato Colectivo si aplica) 2) Base legal (Cláusula Y primero, luego Art. X) 3) Sugerencias 4) Fuentes al final.
+TRAZABILIDAD Y CITAS (OBLIGATORIAS):
+- Cada afirmación legal debe ir acompañada de su fuente: "Según Art. X del Código de Trabajo..." o "La Cláusula Y del Contrato Colectivo establece...".
+- Al final incluye: "Fuentes: Art. X CT, Cláusula Y CC" con las normas que citaste.
+- Prioriza Contrato Colectivo SITRACABAÑA antes que Código de Trabajo.
 
-PARA CONSULTAS DE DESPIDO: Estructura tu respuesta en DOS BLOQUES claros: 1) PRIMERO lo que dice el Contrato Colectivo SITRACABAÑA (Cláusula 7 u otras); 2) DESPUÉS lo que dice el Código de Trabajo (Arts. 55, 58, 59, etc.)."""
+Si NO hay información relevante: "No encontré información sobre esto en los documentos." Recomienda: contacto@sitra-lacabana.org
+Responde siempre en español.
+
+ESTRUCTURA: 1) Respuesta directa 2) Base legal (citas explícitas) 3) Sugerencias 4) Fuentes al final.
+PARA DESPIDO: 1) PRIMERO Contrato Colectivo (Cláusula 7) 2) DESPUÉS Código de Trabajo (Arts. 55, 58, 59).
+
+PARA CONSULTAS SOBRE ZAFRA (temporada de cosecha, zafreros, inicio/fin de zafra, época de zafra): Incluye SIEMPRE la cláusula del Contrato Colectivo que regule el tema (ej. Cláusula 13 Inicio de Zafra, Cláusula 12 trabajadores de zafra, Cláusula 19 horario en zafra, Cláusula 49 transporte en zafra). Cita la cláusula por número y muestra el texto relevante de esa cláusula en tu respuesta."""
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
-        ("human", """Contexto (Código de Trabajo y Contrato Colectivo SITRACABAÑA):
+        ("human", """Contexto (cada fragmento tiene [CITA OBLIGATORIA] - solo puedes citar estas fuentes):
 
 {context}
 
@@ -159,14 +194,24 @@ PARA CONSULTAS DE DESPIDO: Estructura tu respuesta en DOS BLOQUES claros: 1) PRI
 
 Consulta del trabajador: {question}
 
-Responde como asesor sindical. Prioriza el Contrato Colectivo: si hay cláusulas relevantes, cítalas primero. Solo usa fragmentos relevantes. Lista fuentes al final."""),
+Responde con precisión legal. Cita SOLO las fuentes del contexto. Cada afirmación debe tener su Art. X o Cláusula Y. Al final: Fuentes: Art. X CT, Cláusula Y CC."""),
     ])
 
     def format_docs(docs):
-        return "\n\n---\n\n".join(
-            f"[{d.metadata.get('source', '')} - {d.metadata.get('ref', '')}]\n{d.page_content}"
-            for d in docs
-        )
+        parts = []
+        for i, d in enumerate(docs, 1):
+            src = d.metadata.get("source", "")
+            ref = d.metadata.get("ref", "")
+            ref_num = str(d.metadata.get("ref_num", "") or "")
+            src_raw = d.metadata.get("source_raw", "")
+            if ref_num and src_raw == "codigo_trabajo":
+                cite = f"Art. {ref_num} (Código de Trabajo)"
+            elif ref_num and src_raw == "cct_sitracabana":
+                cite = f"Cláusula {ref_num} (Contrato Colectivo SITRACABAÑA)"
+            else:
+                cite = f"{ref} - {src}" if ref else src
+            parts.append(f"[FRAGMENTO {i}] [CITA OBLIGATORIA: {cite}]\n{ref} - {src}\n\n{d.page_content}")
+        return "\n\n---\n\n".join(parts)
 
     chain = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -174,26 +219,38 @@ Responde como asesor sindical. Prioriza el Contrato Colectivo: si hay cláusulas
         | llm
         | StrOutputParser()
     )
+    # Cadena que acepta contexto ya formateado (para zafra: usar docs fusionados)
+    chain_with_context = prompt | llm | StrOutputParser()
 
-    return chain, retriever
+    return chain, retriever, format_docs, chain_with_context
 
 
 _chain = None
 _retriever = None
+_format_docs = None
+_chain_with_context = None
 
 
 def get_chain():
-    global _chain, _retriever
+    global _chain, _retriever, _format_docs, _chain_with_context
     if _chain is None:
-        _chain, _retriever = build_chain()
-    return _chain, _retriever
+        _chain, _retriever, _format_docs, _chain_with_context = build_chain()
+    return _chain, _retriever, _format_docs, _chain_with_context
 
 
 def consulta(pregunta: str) -> dict:
     """Procesa una consulta y devuelve {respuesta, fuentes}."""
-    chain, retriever = get_chain()
+    chain, retriever, format_docs, chain_with_context = get_chain()
     docs = retriever.invoke(pregunta)
-    respuesta = chain.invoke(pregunta)
+    if _is_zafra_query(pregunta):
+        docs_zafra = retriever.invoke(
+            "zafra inicio de zafra zafreros Cláusula 13 12 época de zafra temporada de cosecha horario transporte"
+        )
+        docs = _merge_zafra_docs(docs, docs_zafra, max_docs=10)
+        context_str = format_docs(docs)
+        respuesta = chain_with_context.invoke({"context": context_str, "question": pregunta})
+    else:
+        respuesta = chain.invoke(pregunta)
 
     fuentes = []
     for d in docs[:3]:

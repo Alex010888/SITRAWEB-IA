@@ -143,15 +143,18 @@ class DefensorHandler(BaseHTTPRequestHandler):
 
 
 def main():
+    import os
+    port = int(os.environ.get("PORT", "5000"))
+    host = "0.0.0.0"  # Render y Docker requieren escuchar en todas las interfaces
     print("Iniciando Defensor Laboral IA (LangChain + FAISS)...")
     try:
         from defensor_chain import get_chain
         get_chain()
-        print("Cadena RAG cargada. Servidor en http://127.0.0.1:5000")
+        print(f"Cadena RAG cargada. Servidor en http://{host}:{port}")
     except Exception as e:
         print(f"Advertencia: {e}")
         print("El servidor iniciará pero las consultas pueden fallar.")
-    server = HTTPServer(("127.0.0.1", 5000), DefensorHandler)
+    server = HTTPServer((host, port), DefensorHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

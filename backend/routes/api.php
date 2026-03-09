@@ -195,6 +195,24 @@ class Router
         }
 
         // ============================================
+        // ROOT / HEALTH (para verificar que la API responde)
+        // ============================================
+        if ($this->method === 'GET' && ($this->path === '/' || $this->path === '')) {
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'API SITRACABAÑA',
+                'version' => '1.0',
+                'endpoints' => [
+                    'auth' => '/api/auth/login',
+                    'sections' => '/api/sections',
+                    'public_sections' => '/api/public/sections',
+                ],
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        // ============================================
         // RUTA NO ENCONTRADA
         // ============================================
         $this->notFound();
